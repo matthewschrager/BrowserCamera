@@ -12,4 +12,7 @@
     <dependencies>
     </dependencies>
   </metadata>
+  <files>
+    <file src="*.*" target="Scripts" exclude="*.html" />
+  </files>
 </package> 

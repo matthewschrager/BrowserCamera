@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>BrowserCamera</id>
+    <version>1.0.0.0</version>
+    <title>BrowserCamera</title>
+    <authors>Matthew Schrager</authors>
+    <owners>Matthew Schrager</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A JavaScript library that makes it easy to access webcams from the browser</description>
+    <releaseNotes />
+    <copyright>Copyright Matthew Schrager 2012</copyright>
+    <language />
+  </metadata>
+</package>
