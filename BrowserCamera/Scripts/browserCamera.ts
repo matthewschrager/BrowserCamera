@@ -102,9 +102,9 @@ class Camera
         this.OwnsCanvasElement = false;
     }
 
-    public Start(callback: () => void, videoElement?: HTMLVideoElement = null)
+    public Start(callback: () => void, videoElementId?: string = null)
     {
-        this.InitializeVideo(videoElement);
+        this.InitializeVideo(<HTMLVideoElement>document.getElementById(videoElementId));
 
         navigator.getUserMedia({ video: true }, (stream) => {
             this.LocalMediaStream = stream;
@@ -137,13 +137,21 @@ class Camera
         this.ReleaseVideo();
     }
 
-    public TakeSnapshot(callback: (dataUrl: string) => void , canvasElement?: HTMLCanvasElement = null)
+    public IsStarted()
+    {
+        return this.Video != null && this.Video != undefined;
+    }
+
+    public TakeSnapshot(callback: (dataUrl: string) => void , canvasElementId?: string = null)
     {
         if (!this.Video)
             throw "The camera must be started to take a snapshot. Call Start() before TakeSnapshot().";
 
-        this.InitializeCanvas(canvasElement);
+        this.InitializeCanvas(<HTMLCanvasElement>document.getElementById(canvasElementId));
         setTimeout(() => {
+            this.Canvas.width = this.Video.videoWidth;
+            this.Canvas.height = this.Video.videoHeight;
+
             this.Canvas.getContext('2d').drawImage(this.Video, 0, 0);
             var imgData = this.Canvas.toDataURL("image/png");
             this.ReleaseCanvas();
@@ -153,18 +161,31 @@ class Camera
         }, 50);
     }
 
+    public PostImageData(url: string, paramName: string, imageData: string, callback: (response) => void)
+    {
+        var rawData = imageData.replace('data:image/png;base64,', '');
+        var jsonData = '{ "' + paramName + '": "' + rawData + '" }';
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: jsonData,
+            contentType: "application/json",
+        }).done((response) => callback(response));
+    }
+
     public PostSnapshot(url: string, paramName: string, callback: (response) => void )
     {
-        this.TakeSnapshot((imgData: string) => {
-            var rawData = imgData.replace('data:image/png;base64,', '');
-            var jsonData = '{ "' + paramName + '": "' + rawData + '" }';
-
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: jsonData,
-                contentType: "application/json",
-            }).done((response) => callback(response));
-        });
+        this.TakeSnapshot((imgData: string) => this.PostImageData(url, paramName, imgData, callback));
     }
 }
+
+class CameraStatic
+{
+    public Create()
+    {
+        return new Camera();
+    }
+}
+
+var BrowserCam = new CameraStatic();

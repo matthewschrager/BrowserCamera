@@ -44,10 +44,10 @@ var Camera = (function () {
         this.Canvas = null;
         this.OwnsCanvasElement = false;
     };
-    Camera.prototype.Start = function (callback, videoElement) {
-        if (typeof videoElement === "undefined") { videoElement = null; }
+    Camera.prototype.Start = function (callback, videoElementId) {
+        if (typeof videoElementId === "undefined") { videoElementId = null; }
         var _this = this;
-        this.InitializeVideo(videoElement);
+        this.InitializeVideo(document.getElementById(videoElementId));
         navigator.getUserMedia({
             video: true
         }, function (stream) {
@@ -76,14 +76,19 @@ var Camera = (function () {
         }
         this.ReleaseVideo();
     };
-    Camera.prototype.TakeSnapshot = function (callback, canvasElement) {
-        if (typeof canvasElement === "undefined") { canvasElement = null; }
+    Camera.prototype.IsStarted = function () {
+        return this.Video != null && this.Video != undefined;
+    };
+    Camera.prototype.TakeSnapshot = function (callback, canvasElementId) {
+        if (typeof canvasElementId === "undefined") { canvasElementId = null; }
         var _this = this;
         if(!this.Video) {
             throw "The camera must be started to take a snapshot. Call Start() before TakeSnapshot().";
         }
-        this.InitializeCanvas(canvasElement);
+        this.InitializeCanvas(document.getElementById(canvasElementId));
         setTimeout(function () {
+            _this.Canvas.width = _this.Video.videoWidth;
+            _this.Canvas.height = _this.Video.videoHeight;
             _this.Canvas.getContext('2d').drawImage(_this.Video, 0, 0);
             var imgData = _this.Canvas.toDataURL("image/png");
             _this.ReleaseCanvas();
@@ -92,19 +97,31 @@ var Camera = (function () {
             }
         }, 50);
     };
+    Camera.prototype.PostImageData = function (url, paramName, imageData, callback) {
+        var rawData = imageData.replace('data:image/png;base64,', '');
+        var jsonData = '{ "' + paramName + '": "' + rawData + '" }';
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: jsonData,
+            contentType: "application/json"
+        }).done(function (response) {
+            return callback(response);
+        });
+    };
     Camera.prototype.PostSnapshot = function (url, paramName, callback) {
+        var _this = this;
         this.TakeSnapshot(function (imgData) {
-            var rawData = imgData.replace('data:image/png;base64,', '');
-            var jsonData = '{ "' + paramName + '": "' + rawData + '" }';
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: jsonData,
-                contentType: "application/json"
-            }).done(function (response) {
-                return callback(response);
-            });
+            return _this.PostImageData(url, paramName, imgData, callback);
         });
     };
     return Camera;
 })();
+var CameraStatic = (function () {
+    function CameraStatic() { }
+    CameraStatic.prototype.Create = function () {
+        return new Camera();
+    };
+    return CameraStatic;
+})();
+var BrowserCam = new CameraStatic();

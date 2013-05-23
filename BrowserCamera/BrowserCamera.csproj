@@ -61,11 +61,12 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="browserCamera.ts" />
-    <Content Include="browserCamera.js">
+    <TypeScriptCompile Include="Scripts\browserCamera.ts" />
+    <TypeScriptCompile Include="Scripts\browserCamera.d.ts" />
+    <Content Include="Scripts\browserCamera.js">
       <DependentUpon>browserCamera.ts</DependentUpon>
     </Content>
-    <Content Include="browserCamera.min.js">
+    <Content Include="Scripts\browserCamera.min.js">
       <DependentUpon>browserCamera.ts</DependentUpon>
     </Content>
   </ItemGroup>
@@ -73,7 +74,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="BrowserCamera.nuspec" />
+    <Content Include="BrowserCamera.nuspec">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
