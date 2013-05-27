@@ -97,8 +97,11 @@ var Camera = (function () {
             }
         }, 50);
     };
-    Camera.prototype.PostImageData = function (url, paramName, imageData, callback) {
-        var rawData = imageData.replace('data:image/png;base64,', '');
+    Camera.DataUrlToRawData = function DataUrlToRawData(dataUrl) {
+        return dataUrl.replace('data:image/png;base64,', '');
+    };
+    Camera.prototype.PostImageData = function (url, paramName, dataUrl, callback) {
+        var rawData = Camera.DataUrlToRawData(dataUrl);
         var jsonData = '{ "' + paramName + '": "' + rawData + '" }';
         $.ajax({
             url: url,
@@ -121,6 +124,9 @@ var CameraStatic = (function () {
     function CameraStatic() { }
     CameraStatic.prototype.Create = function () {
         return new Camera();
+    };
+    CameraStatic.prototype.DataUrlToRawData = function (dataUrl) {
+        return Camera.DataUrlToRawData(dataUrl);
     };
     return CameraStatic;
 })();

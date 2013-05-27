@@ -161,9 +161,14 @@ class Camera
         }, 50);
     }
 
-    public PostImageData(url: string, paramName: string, imageData: string, callback: (response) => void)
+    public static DataUrlToRawData(dataUrl: string)
     {
-        var rawData = imageData.replace('data:image/png;base64,', '');
+        return dataUrl.replace('data:image/png;base64,', '');
+    }
+
+    public PostImageData(url: string, paramName: string, dataUrl: string, callback: (response) => void)
+    {
+        var rawData = Camera.DataUrlToRawData(dataUrl);
         var jsonData = '{ "' + paramName + '": "' + rawData + '" }';
 
         $.ajax({
@@ -185,6 +190,11 @@ class CameraStatic
     public Create()
     {
         return new Camera();
+    }
+
+    public DataUrlToRawData(dataUrl: string)
+    {
+        return Camera.DataUrlToRawData(dataUrl);
     }
 }
 
